@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('房型管理', ~{::main})}" data-page-node-id="cuEaePJgDFx5V3wdSlNCfP">
+<main data-page-node-id="uFXr0LdoIE1AcgZPI8054y">
+    <div class="card" data-page-node-id="AeicSPi1Oq8D9BJrcxLQSe">
+        <div class="card-header d-flex justify-content-between align-items-center" data-page-node-id="naq6QQDyjJrYLipqPhICQa">
+            <span data-page-node-id="WGXb7lXgeKfIJJEO5VrTIg">房型列表</span>
+            <button class="btn btn-primary btn-sm" onclick="openTypeModal()" data-page-node-id="SIdJEGUxBJITGdwPXeTptb">新增房型</button>
+        </div>
+        <div class="card-body" data-page-node-id="zWomYYVQJw9pJNz62EmqEd">
+            <table class="table table-hover" data-page-node-id="JOoBwsWaubKZgEAwZkFNz4">
+                <thead data-page-node-id="oFgWxMjuF5ty1Czq3d40fB">
+                    <tr data-page-node-id="IutYYADCBUzNFwQlmgD8ug">
+                        <th data-page-node-id="w4TijGMx6Qkom2WY5U1qcB">房型名称</th>
+                        <th data-page-node-id="cNxNpMHZNJnUGhjXCFHbJW">基础房价</th>
+                        <th data-page-node-id="O9sovBeGztbLFTRzcwPWo6">床型</th>
+                        <th data-page-node-id="ew1Mv6Ypqtn05cS3eliG8Y">可住人数</th>
+                        <th data-page-node-id="rGKABgBFFkXzaCXPQojpud">备注</th>
+                        <th data-page-node-id="TETyjRXKYzTdVAJPZ2UXee">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="typeTable" data-page-node-id="rfutBDrhzHF3eNn2yhHaS5"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="typeModal" tabindex="-1" data-page-node-id="w9kqD180fGyEjAjqn0BAZj">
+        <div class="modal-dialog" data-page-node-id="0TB5uipOq9rpOlSVcljvI6">
+            <div class="modal-content" data-page-node-id="k4u6FTYGdhetLNDtG7gPyq">
+                <div class="modal-header" data-page-node-id="VOKvFpsQeFTJAdyPIDb2Rh">
+                    <h5 class="modal-title" data-page-node-id="otEyychZMxfm0c05nqXN7p">房型信息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-page-node-id="OG7MgWubt214RbEHeVTXBx"></button>
+                </div>
+                <div class="modal-body" data-page-node-id="Ix1SaC3RCzEwKE94sRdKq5">
+                    <form id="typeForm" data-page-node-id="16x0mc1ZdEqECEgbCegM9V">
+                        <input type="hidden" id="typeId" data-page-node-id="vrloB26kJTZV6rDZtFGW7t">
+                        <div class="mb-3" data-page-node-id="T6mmmZkQjHsucZMl4p0RLD">
+                            <label class="form-label" data-page-node-id="xrXZNvaAh0uKWrIgqjsyBh">房型名称</label>
+                            <input type="text" class="form-control" id="typeName" required data-page-node-id="nspbFflWCobHn8zjCGPAlj">
+                        </div>
+                        <div class="mb-3" data-page-node-id="oVPrZcAkeoxOhGat5N0e97">
+                            <label class="form-label" data-page-node-id="CFmt1u4pl7lJzOnoCIxEEH">基础房价</label>
+                            <input type="number" class="form-control" id="basePrice" step="0.01" required data-page-node-id="yrP80P61cqHPrPUtZWxUGR">
+                        </div>
+                        <div class="mb-3" data-page-node-id="jEgLiMpupYdGWs3kZv4Qci">
+                            <label class="form-label" data-page-node-id="0L7YWeS0RvBYr3tBdArPxj">床型</label>
+                            <input type="text" class="form-control" id="bedType" data-page-node-id="DUAwDbFMmeiZvWInKJ3GZn">
+                        </div>
+                        <div class="mb-3" data-page-node-id="sAbbzWZ9iWH3HVUBQh7ffC">
+                            <label class="form-label" data-page-node-id="ngihYDTpzOWcKXy1B96Q7d">可住人数</label>
+                            <input type="number" class="form-control" id="capacity" value="2" data-page-node-id="QLuJuo0t7QKoMxu6MRTEDi">
+                        </div>
+                        <div class="mb-3" data-page-node-id="MKwAXbsQFcVZ1fqVpkQ4xf">
+                            <label class="form-label" data-page-node-id="EpQN5EwGKuGLIWI8G0IjXp">备注</label>
+                            <textarea class="form-control" id="typeRemark" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" data-page-node-id="2JURiE5zmLkouLxKR05As4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-page-node-id="UpB5ie5YPt2NSbzj55lwnY">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="saveType()" data-page-node-id="A8WqtXNJbDAOqOLAS9M9Gn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let typeModal;
+
+        function loadTypes() {
+            ajaxGet('/api/room/type/list', function(data) {
+                const $tbody = $('#typeTable').empty();
+                if (!data || data.length === 0) {
+                    $tbody.append('<tr><td colspan="6" class="text-center text-muted">暂无房型</td></tr>');
+                    return;
+                }
+                data.forEach(item => {
+                    const html = `
+                        <tr>
+                            <td>${item.typeName}</td>
+                            <td>¥${item.basePrice}</td>
+                            <td>${item.bedType || ''}</td>
+                            <td>${item.capacity || 2}</td>
+                            <td>${item.remark || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editType(${item.id})">编辑</button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(html);
+                });
+            });
+        }
+
+        function openTypeModal() {
+            $('#typeForm')[0].reset();
+            $('#typeId').val('');
+            typeModal.show();
+        }
+
+        function editType(id) {
+            ajaxGet('/api/room/type/list', function(data) {
+                const item = data.find(t => t.id === id);
+                if (!item) return;
+                $('#typeId').val(item.id);
+                $('#typeName').val(item.typeName);
+                $('#basePrice').val(item.basePrice);
+                $('#bedType').val(item.bedType);
+                $('#capacity').val(item.capacity);
+                $('#typeRemark').val(item.remark);
+                typeModal.show();
+            });
+        }
+
+        function saveType() {
+            const data = {
+                id: $('#typeId').val() || null,
+                typeName: $('#typeName').val(),
+                basePrice: $('#basePrice').val(),
+                bedType: $('#bedType').val(),
+                capacity: $('#capacity').val() || 2,
+                remark: $('#typeRemark').val()
+            };
+            ajaxPost('/api/room/type/save', data, function() {
+                typeModal.hide();
+                loadTypes();
+            });
+        }
+
+        $(function() {
+            typeModal = new bootstrap.Modal(document.getElementById('typeModal'));
+            loadTypes();
+        });
+    </script>
+</main>
+</html>

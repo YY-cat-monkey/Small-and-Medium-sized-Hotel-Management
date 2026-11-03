@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('预订管理', ~{::main})}">
+<main>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>预订订单</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()">新增预订</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>客户姓名</th>
+                        <th>手机号</th>
+                        <th>房型/房间</th>
+                        <th>入住日期</th>
+                        <th>离店日期</th>
+                        <th>总价</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新增预订</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <input type="hidden" id="orderId" name="id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">客户姓名</label>
+                                <input type="text" class="form-control" id="customerName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">手机号</label>
+                                <input type="tel" class="form-control" id="customerPhone" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">预订房型</label>
+                                <select class="form-select" id="roomTypeId">
+                                    <option value="">请选择房型</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">分配房间</label>
+                                <select class="form-select" id="roomId">
+                                    <option value="">自动分配</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">入住日期</label>
+                                <input type="date" class="form-control" id="checkinDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">离店日期</label>
+                                <input type="date" class="form-control" id="checkoutDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注</label>
+                            <textarea class="form-control" id="remark" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBooking()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bookingModal;
+
+        function loadBookings() {
+            ajaxGet('/api/booking/list', function(data) {
+                const $tbody = $('#bookingTable').empty();
+                if (!data || data.length === 0) {
+                    $tbody.append('<tr><td colspan="9" class="text-center text-muted">暂无预订</td></tr>');
+                    return;
+                }
+                data.forEach(item => {
+                    const typeRoom = (item.typeName || '') + (item.roomNo ? ' / ' + item.roomNo : '');
+                    const html = `
+                        <tr>
+                            <td>${item.orderNo}</td>
+                            <td>${item.customerName || ''}</td>
+                            <td>${item.customerPhone || ''}</td>
+                            <td>${typeRoom}</td>
+                            <td>${formatDateOnly(item.checkinDate)}</td>
+                            <td>${formatDateOnly(item.checkoutDate)}</td>
+                            <td>¥${item.totalPrice || 0}</td>
+                            <td><span class="status-badge ${roomStatusClass(item.status === 0 ? 1 : item.status)}">${bookingStatusText(item.status)}</span></td>
+                            <td>
+                                ${item.status == 1 && item.roomId ? `<button class="btn btn-sm btn-success" onclick="checkinFromBooking(${item.id})">入住</button>` : ''}
+                                ${item.status != 3 && item.status != 2 ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking(${item.id})">取消</button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(html);
+                });
+            });
+        }
+
+        function loadTypesAndRooms() {
+            ajaxGet('/api/room/type/list', function(types) {
+                const $type = $('#roomTypeId').empty().append('<option value="">请选择房型</option>');
+                types.forEach(t => $type.append(`<option value="${t.id}" data-price="${t.basePrice}">${t.typeName} ¥${t.basePrice}</option>`));
+            });
+            ajaxGet('/api/room/list', function(rooms) {
+                const $room = $('#roomId').empty().append('<option value="">自动分配</option>');
+                rooms.filter(r => r.status === 0).forEach(r => {
+                    $room.append(`<option value="${r.id}" data-type="${r.roomTypeId}">${r.roomNo} ¥${r.price}</option>`);
+                });
+            });
+        }
+
+        function openAddModal() {
+            $('#bookingForm')[0].reset();
+            $('#orderId').val('');
+            loadTypesAndRooms();
+            bookingModal.show();
+        }
+
+        function saveBooking() {
+            const data = {
+                customerName: $('#customerName').val(),
+                customerPhone: $('#customerPhone').val(),
+                roomTypeId: $('#roomTypeId').val() || null,
+                roomId: $('#roomId').val() || null,
+                checkinDate: $('#checkinDate').val(),
+                checkoutDate: $('#checkoutDate').val(),
+                remark: $('#remark').val(),
+                status: 1
+            };
+            ajaxPost('/api/booking/save', data, function() {
+                bookingModal.hide();
+                loadBookings();
+            });
+        }
+
+        function cancelBooking(id) {
+            if (!confirm('确定取消该预订吗？')) return;
+            ajaxPostForm('/api/booking/cancel/' + id, {}, function() {
+                loadBookings();
+            });
+        }
+
+        function checkinFromBooking(id) {
+            if (!confirm('确定为该预订办理入住吗？')) return;
+            ajaxPostForm('/api/checkin/fromBooking', {bookingId: id}, function() {
+                alert('入住办理成功');
+                loadBookings();
+            });
+        }
+
+        $(function() {
+            bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            loadBookings();
+        });
+    </script>
+</main>
+</html>

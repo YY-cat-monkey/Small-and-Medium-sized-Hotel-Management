@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('退房结算', ~{::main})}">
+<main>
+    <div class="card">
+        <div class="card-header">在住记录 - 选择退房</div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>入住单号</th>
+                        <th>客户姓名</th>
+                        <th>房间</th>
+                        <th>入住时间</th>
+                        <th>预计退房</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="checkoutTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">退房结算</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="checkoutInfo" class="mb-3"></div>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr><td>房费</td><td id="roomFee">¥0</td></tr>
+                            <tr><td>额外消费</td><td id="consumptionAmount">¥0</td></tr>
+                            <tr><td>优惠</td><td id="discount">¥0</td></tr>
+                            <tr class="table-primary"><td>应收金额</td><td id="totalAmount">¥0</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="mb-3">
+                        <label class="form-label">实收金额</label>
+                        <input type="number" class="form-control" id="paidAmount" step="0.01">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="confirmCheckoutBtn">确认退房</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBillId = null;
+        let checkoutModal;
+
+        function loadCheckouts() {
+            ajaxGet('/api/checkin/list?status=0', function(data) {
+                const $tbody = $('#checkoutTable').empty();
+                if (!data || data.length === 0) {
+                    $tbody.append('<tr><td colspan="6" class="text-center text-muted">暂无在住记录</td></tr>');
+                    return;
+                }
+                data.forEach(item => {
+                    const html = `
+                        <tr>
+                            <td>${item.recordNo}</td>
+                            <td>${item.customerName || ''}</td>
+                            <td>${item.roomNo || ''}</td>
+                            <td>${formatDate(item.checkinTime)}</td>
+                            <td>${formatDate(item.checkoutTime)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="openCheckout(${item.id})">退房结算</button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(html);
+                });
+            });
+        }
+
+        function openCheckout(checkinId) {
+            currentBillId = null;
+            ajaxGet('/api/bill/byCheckin/' + checkinId, function(data) {
+                const record = data.record;
+                const bill = data.bill;
+                const consumptions = data.consumptions || [];
+                const consumptionAmount = consumptions.reduce((sum, c) => sum + Number(c.amount || 0), 0);
+
+                $('#checkoutInfo').html(`
+                    <p><strong>入住单号：</strong>${record.recordNo}</p>
+                    <p><strong>客户：</strong>${record.customerName} ${record.customerPhone}</p>
+                    <p><strong>房间：</strong>${record.roomNo}</p>
+                `);
+
+                if (bill) {
+                    currentBillId = bill.id;
+                    $('#roomFee').text('¥' + (bill.roomFee || 0));
+                    $('#consumptionAmount').text('¥' + (bill.consumptionAmount || consumptionAmount));
+                    $('#discount').text('¥' + (bill.discount || 0));
+                    $('#totalAmount').text('¥' + (bill.totalAmount || 0));
+                    $('#paidAmount').val(bill.totalAmount || 0);
+                    $('#confirmCheckoutBtn').off('click').on('click', function() {
+                        payAndCheckout(currentBillId);
+                    });
+                } else {
+                    ajaxPostForm('/api/bill/generate/' + checkinId, {}, function(billData) {
+                        openCheckout(checkinId);
+                    });
+                    return;
+                }
+
+                checkoutModal.show();
+            });
+        }
+
+        function payAndCheckout(billId) {
+            const paidAmount = $('#paidAmount').val();
+            if (!paidAmount || Number(paidAmount) <= 0) {
+                alert('请输入实收金额');
+                return;
+            }
+            ajaxPostForm('/api/bill/pay', {billId: billId, paidAmount: paidAmount}, function() {
+                checkoutModal.hide();
+                loadCheckouts();
+                alert('退房结算成功');
+            });
+        }
+
+        $(function() {
+            checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+            loadCheckouts();
+        });
+    </script>
+</main>
+</html>

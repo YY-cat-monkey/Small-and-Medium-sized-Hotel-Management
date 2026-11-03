@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('客户管理', ~{::main})}">
+<main>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>客户列表</span>
+            <button class="btn btn-primary btn-sm" onclick="openCustomerModal()">新增客户</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>手机号</th>
+                        <th>身份证号</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">客户信息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <input type="hidden" id="customerId">
+                        <div class="mb-3">
+                            <label class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">手机号</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">身份证号</label>
+                            <input type="text" class="form-control" id="idCard">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomer()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customerModal;
+
+        function loadCustomers() {
+            ajaxGet('/api/customer/list', function(data) {
+                const $tbody = $('#customerTable').empty();
+                if (!data || data.length === 0) {
+                    $tbody.append('<tr><td colspan="5" class="text-center text-muted">暂无客户</td></tr>');
+                    return;
+                }
+                data.forEach(item => {
+                    const html = `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.phone || ''}</td>
+                            <td>${item.idCard || ''}</td>
+                            <td>${formatDate(item.createTime)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editCustomer(${item.id})">编辑</button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(html);
+                });
+            });
+        }
+
+        function openCustomerModal() {
+            $('#customerForm')[0].reset();
+            $('#customerId').val('');
+            customerModal.show();
+        }
+
+        function editCustomer(id) {
+            ajaxGet('/api/customer/detail/' + id, function(data) {
+                $('#customerId').val(data.id);
+                $('#name').val(data.name);
+                $('#phone').val(data.phone);
+                $('#idCard').val(data.idCard);
+                customerModal.show();
+            });
+        }
+
+        function saveCustomer() {
+            const data = {
+                id: $('#customerId').val() || null,
+                name: $('#name').val(),
+                phone: $('#phone').val(),
+                idCard: $('#idCard').val()
+            };
+            ajaxPost('/api/customer/save', data, function() {
+                customerModal.hide();
+                loadCustomers();
+            });
+        }
+
+        $(function() {
+            customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+            loadCustomers();
+        });
+    </script>
+</main>
+</html>

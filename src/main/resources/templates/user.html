@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('系统用户', ~{::main})}">
+<main>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>用户列表</span>
+            <button class="btn btn-primary btn-sm" onclick="openUserModal()">新增用户</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>真实姓名</th>
+                        <th>角色</th>
+                        <th>电话</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">用户信息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-control" id="password" placeholder="不修改请留空">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">真实姓名</label>
+                            <input type="text" class="form-control" id="realName">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">角色</label>
+                            <select class="form-select" id="role">
+                                <option value="0">管理员</option>
+                                <option value="1">前台</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">电话</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">状态</label>
+                            <select class="form-select" id="status">
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userModal;
+
+        function loadUsers() {
+            ajaxGet('/api/user/list', function(data) {
+                const $tbody = $('#userTable').empty();
+                if (!data || data.length === 0) {
+                    $tbody.append('<tr><td colspan="6" class="text-center text-muted">暂无用户</td></tr>');
+                    return;
+                }
+                data.forEach(item => {
+                    const html = `
+                        <tr>
+                            <td>${item.username}</td>
+                            <td>${item.realName || ''}</td>
+                            <td>${item.role === 0 ? '管理员' : '前台'}</td>
+                            <td>${item.phone || ''}</td>
+                            <td>${item.status === 1 ? '启用' : '禁用'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editUser(${item.id})">编辑</button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(html);
+                });
+            });
+        }
+
+        function openUserModal() {
+            $('#userForm')[0].reset();
+            $('#userId').val('');
+            userModal.show();
+        }
+
+        function editUser(id) {
+            ajaxGet('/api/user/detail/' + id, function(data) {
+                $('#userId').val(data.id);
+                $('#username').val(data.username);
+                $('#password').val('');
+                $('#realName').val(data.realName);
+                $('#role').val(data.role);
+                $('#phone').val(data.phone);
+                $('#status').val(data.status);
+                userModal.show();
+            });
+        }
+
+        function saveUser() {
+            const data = {
+                id: $('#userId').val() || null,
+                username: $('#username').val(),
+                password: $('#password').val(),
+                realName: $('#realName').val(),
+                role: parseInt($('#role').val()),
+                phone: $('#phone').val(),
+                status: parseInt($('#status').val())
+            };
+            ajaxPost('/api/user/save', data, function() {
+                userModal.hide();
+                loadUsers();
+            });
+        }
+
+        $(function() {
+            userModal = new bootstrap.Modal(document.getElementById('userModal'));
+            loadUsers();
+        });
+    </script>
+</main>
+</html>

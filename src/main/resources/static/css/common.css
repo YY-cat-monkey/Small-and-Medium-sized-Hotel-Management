@@ -1,0 +1,108 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+}
+
+.room-card {
+    border-radius: 8px;
+    padding: 16px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.room-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.room-card .room-no {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.room-card .room-type {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.room-card .room-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.25);
+}
+
+.status-free { background: linear-gradient(135deg, #28a745, #20c997); }
+.status-booked { background: linear-gradient(135deg, #ffc107, #ffca2c); color: #333; }
+.status-inuse { background: linear-gradient(135deg, #dc3545, #fd7e14); }
+.status-cleaning { background: linear-gradient(135deg, #17a2b8, #0dcaf0); }
+.status-repair { background: linear-gradient(135deg, #6c757d, #adb5bd); }
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-free { background-color: #d1e7dd; color: #0f5132; }
+.badge-booked { background-color: #fff3cd; color: #664d03; }
+.badge-inuse { background-color: #f8d7da; color: #842029; }
+.badge-cleaning { background-color: #cff4fc; color: #055160; }
+.badge-repair { background-color: #e2e3e5; color: #41464b; }
+
+.dashboard-stat {
+    border-radius: 8px;
+    padding: 20px;
+    color: #fff;
+}
+
+.dashboard-stat h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.dashboard-stat p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.stat-primary { background: linear-gradient(135deg, #0d6efd, #0dcaf0); }
+.stat-success { background: linear-gradient(135deg, #198754, #20c997); }
+.stat-warning { background: linear-gradient(135deg, #ffc107, #ff9800); color: #333; }
+.stat-danger { background: linear-gradient(135deg, #dc3545, #e91e63); }
+
+.form-label {
+    font-weight: 500;
+}
+
+.table th {
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+.chart-container {
+    height: 300px;
+}

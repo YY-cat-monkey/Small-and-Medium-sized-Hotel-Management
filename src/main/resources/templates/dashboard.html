@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('首页', ~{::main})}">
+<main>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="dashboard-stat stat-primary">
+                <p>总房间数</p>
+                <h3 id="totalRooms">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat stat-success">
+                <p>今日入住</p>
+                <h3 id="todayCheckin">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat stat-warning">
+                <p>在住人数</p>
+                <h3 id="inHouseCount">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat stat-danger">
+                <p>总营收</p>
+                <h3 id="totalRevenue">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">房间状态分布</div>
+                <div class="card-body">
+                    <div id="statusChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">快捷操作</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="/booking" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bi bi-calendar-plus fs-4"></i><br>新增预订
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/checkin" class="btn btn-outline-success w-100 py-3">
+                                <i class="bi bi-box-arrow-in-right fs-4"></i><br>办理入住
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/checkout" class="btn btn-outline-danger w-100 py-3">
+                                <i class="bi bi-box-arrow-right fs-4"></i><br>退房结算
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/room" class="btn btn-outline-info w-100 py-3">
+                                <i class="bi bi-door-open fs-4"></i><br>房态看板
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadDashboard() {
+            ajaxGet('/api/statistics/dashboard', function(data) {
+                const statusData = data.roomStatus || [];
+                const statusMap = {0: '空闲', 1: '预订', 2: '在用', 3: '清洁', 4: '维修'};
+                const colorMap = {0: '#28a745', 1: '#ffc107', 2: '#dc3545', 3: '#17a2b8', 4: '#6c757d'};
+
+                let totalRooms = 0;
+                const chartData = [];
+                statusData.forEach(item => {
+                    totalRooms += Number(item.count);
+                    chartData.push({
+                        value: item.count,
+                        name: statusMap[item.status] || '未知'
+                    });
+                });
+                $('#totalRooms').text(totalRooms);
+                $('#todayCheckin').text(data.todayCheckin || 0);
+                $('#inHouseCount').text(data.inHouseCount || 0);
+                $('#totalRevenue').text('¥' + (data.totalRevenue || 0));
+
+                const chart = echarts.init(document.getElementById('statusChart'));
+                chart.setOption({
+                    tooltip: {trigger: 'item'},
+                    legend: {bottom: '0'},
+                    color: statusData.map(item => colorMap[item.status] || '#999'),
+                    series: [{
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {borderRadius: 10, borderColor: '#fff', borderWidth: 2},
+                        label: {show: true, formatter: '{b}\n{c}'},
+                        data: chartData
+                    }]
+                });
+            });
+        }
+
+        $(function() {
+            loadDashboard();
+        });
+    </script>
+</main>
+</html>

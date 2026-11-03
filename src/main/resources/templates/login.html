@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="nSWdHSuThRZhXqkqusCJeV">
+<head data-page-node-id="CzIW54ERnjYw0Z2S5jJqUH">
+    <meta charset="UTF-8" data-page-node-id="xC31dOkhavZFC3ZbT9KewW">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="NNNApKJl0yjz50uFx8vnVu">
+    <title>登录 - 酒店管理系统</title>
+    <link href="/lib/bootstrap/bootstrap.min.css" rel="stylesheet" data-page-node-id="C5uoRp8OAW4Otv0aTsMufA">
+    <link href="/lib/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" data-page-node-id="pzrCUBFDlEMb4udpV8sHKe">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.5;
+            animation: move 20s linear infinite;
+        }
+
+        @keyframes move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 30px); }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50% 50% 0 0;
+        }
+
+        .login-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-header h3 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .login-header p {
+            margin: 8px 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .login-body {
+            padding: 40px 35px 35px;
+        }
+
+        .form-floating {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-floating > .form-control {
+            height: 58px;
+            border: 2px solid #e9ecef;
+            border-radius: 14px;
+            padding-left: 50px;
+            padding-right: 45px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-floating > .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-floating > label {
+            left: 50px;
+            padding-left: 0;
+            color: #6c757d;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 1.2rem;
+            z-index: 2;
+            transition: color 0.3s ease;
+        }
+
+        .form-floating > .form-control:focus ~ .input-icon {
+            color: #667eea;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #adb5bd;
+            cursor: pointer;
+            z-index: 2;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 54px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-login .spinner-border {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-width: 0.15em;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 1055;
+            min-width: 300px;
+            max-width: 90%;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .alert-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 480px) {
+            .login-body {
+                padding: 30px 25px 25px;
+            }
+            .login-header {
+                padding: 30px 25px 25px;
+            }
+        }
+    </style>
+</head>
+<body data-page-node-id="Qt4U7ukZ6xDzm0yIEoIWfj">
+    <div class="login-wrapper" data-page-node-id="iVofhNsfoxiV5BAddxLsSR">
+        <div class="login-card" data-page-node-id="BNbqYIGdNwc9UKIah3UDj5">
+            <div class="login-header" data-page-node-id="DYgUC8SeOIyoUIsrHgdm5Y">
+                <div class="login-icon" data-page-node-id="5ShRmw5gGbLIgGPAaLkfVD">
+                    <i class="bi bi-building" data-page-node-id="eNUI6upvXbaK4yMefYyf5M"></i>
+                </div>
+                <h3 data-page-node-id="6bwIkpsIslo4X5LraA00vA">酒店管理系统</h3>
+                <p data-page-node-id="7y2n1MUd28yzQAqJ81mNZV">Hotel Management System</p>
+            </div>
+            <div class="login-body" data-page-node-id="l7dxbBdfPC8s8fBOgBySr1">
+                <form id="loginForm" data-page-node-id="svHRT4l1g0CMkgSdoDHXAw">
+                    <div class="form-floating" data-page-node-id="ebf15NZcosxfHATozoUhi0">
+                        <i class="bi bi-person input-icon" data-page-node-id="MSQiknSuNY9hOFIQrH579S"></i>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名" autocomplete="username" autofocus required data-page-node-id="Ii9Aq2jVPmYj9GwblbEG6v">
+                        <label for="username" data-page-node-id="34twMjtjnbF2WkfIdHr9fR">用户名</label>
+                    </div>
+                    <div class="form-floating" data-page-node-id="l1XocAL68COxK5zkHLlgLC">
+                        <i class="bi bi-lock input-icon" data-page-node-id="fk7e8kzX8Jzm13RbtJ8wEp"></i>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码" autocomplete="current-password" required data-page-node-id="7JTrRblGroaCPVYoX3jisM">
+                        <label for="password" data-page-node-id="FHkGLIYAsElz1JJiJpDnTd">密码</label>
+                        <button type="button" class="toggle-password" id="togglePassword" tabindex="-1" data-page-node-id="ciR7A6Bszw7wz96rD6zr15">
+                            <i class="bi bi-eye-slash" data-page-node-id="MeqOru6tGiPd0r6PSZPH9N"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-login" id="loginBtn" data-page-node-id="QFKUsvZC44B6Vg3qgVYhhq">
+                        <span class="btn-text" data-page-node-id="VwzRGBAAZWOfXk0cgwisfk">登 录</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" data-page-node-id="1ndkCkuOZSf3sJOhybPITz"></span>
+                    </button>
+                    <div class="login-footer" data-page-node-id="HmCGFkOjAYxtpANInUaAwB">
+                        默认账号：<a href="javascript:void(0)" id="fillAdmin" data-page-node-id="ssXNHFzEdIGQzSycvBqaIV">admin / 123456</a> 或 <a href="javascript:void(0)" id="fillFront" data-page-node-id="3WrGOavwzHIefHukP9Anl5">front / 123456</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-danger alert-toast" id="errorToast" role="alert" data-page-node-id="X56Abaxp3IaMUrRpF0L1sv">
+        <i class="bi bi-exclamation-circle-fill me-2" data-page-node-id="5vgmDZyNQqhs9rLIrUIZAl"></i>
+        <span id="errorMsg" data-page-node-id="6BeVDJeSdFuLeHZstikh95"></span>
+    </div>
+
+    <script src="/lib/jquery/jquery.min.js"></script>
+    <script src="/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function() {
+            // 密码显示/隐藏切换
+            $('#togglePassword').on('click', function() {
+                const passwordInput = $('#password');
+                const icon = $(this).find('i');
+                
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('bi-eye-slash').addClass('bi-eye');
+                } else {
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                }
+            });
+
+            // 快速填充默认账号
+            $('#fillAdmin').on('click', function(e) {
+                e.preventDefault();
+                $('#username').val('admin');
+                $('#password').val('123456');
+                $('#password').attr('type', 'password');
+                $('#togglePassword i').removeClass('bi-eye').addClass('bi-eye-slash');
+            });
+
+            $('#fillFront').on('click', function(e) {
+                e.preventDefault();
+                $('#username').val('front');
+                $('#password').val('123456');
+                $('#password').attr('type', 'password');
+                $('#togglePassword i').removeClass('bi-eye').addClass('bi-eye-slash');
+            });
+
+            // 错误提示
+            function showError(msg) {
+                $('#errorMsg').text(msg);
+                $('#errorToast').addClass('show');
+                $('.login-card').addClass('shake');
+                setTimeout(function() {
+                    $('#errorToast').removeClass('show');
+                    $('.login-card').removeClass('shake');
+                }, 3000);
+            }
+
+            // 表单提交
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const username = $.trim($('#username').val());
+                const password = $('#password').val();
+                
+                if (!username) {
+                    showError('请输入用户名');
+                    $('#username').focus();
+                    return;
+                }
+                if (!password) {
+                    showError('请输入密码');
+                    $('#password').focus();
+                    return;
+                }
+
+                const $btn = $('#loginBtn');
+                const $text = $btn.find('.btn-text');
+                const $spinner = $btn.find('.spinner-border');
+                
+                $btn.prop('disabled', true);
+                $text.text('登录中...');
+                $spinner.removeClass('d-none');
+
+                $.ajax({
+                    url: '/doLogin',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.code === 200) {
+                            window.location.href = '/dashboard';
+                        } else {
+                            showError(res.msg || '登录失败');
+                            $btn.prop('disabled', false);
+                            $text.text('登 录');
+                            $spinner.addClass('d-none');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        showError('网络请求失败，请检查网络或刷新页面');
+                        $btn.prop('disabled', false);
+                        $text.text('登 录');
+                        $spinner.addClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

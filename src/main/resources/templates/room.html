@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('客房管理', ~{::main})}">
+<main>
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>房态看板</span>
+                    <div>
+                        <span class="badge badge-free">空闲</span>
+                        <span class="badge badge-booked">预订</span>
+                        <span class="badge badge-inuse">在用</span>
+                        <span class="badge badge-cleaning">清洁</span>
+                        <span class="badge badge-repair">维修</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="roomBoard" class="row g-3">
+                        <!-- 房间卡片由JS渲染 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let roomList = [];
+        let typeList = [];
+
+        function loadTypes() {
+            ajaxGet('/api/room/type/list', function(data) {
+                typeList = data || [];
+                loadRooms();
+            });
+        }
+
+        function loadRooms() {
+            ajaxGet('/api/room/list', function(data) {
+                roomList = data || [];
+                renderRoomBoard();
+            });
+        }
+
+        function renderRoomBoard() {
+            const $board = $('#roomBoard').empty();
+            if (roomList.length === 0) {
+                $board.append('<div class="col-12 text-center text-muted">暂无房间数据</div>');
+                return;
+            }
+            roomList.forEach(room => {
+                const typeName = room.typeName || '未知房型';
+                const statusClass = ['status-free','status-booked','status-inuse','status-cleaning','status-repair'][room.status] || 'status-free';
+                const statusText = roomStatusText(room.status);
+                const html = `
+                    <div class="col-md-3 col-lg-2 col-sm-6">
+                        <div class="room-card ${statusClass}" data-id="${room.id}">
+                            <div class="room-status">${statusText}</div>
+                            <div class="room-no">${room.roomNo}</div>
+                            <div class="room-type">${typeName}</div>
+                            <div class="mt-2 small">¥${room.price || 0}</div>
+                            <div class="mt-1 small">${room.floor}层</div>
+                        </div>
+                    </div>
+                `;
+                $board.append(html);
+            });
+
+            $('.room-card').on('click', function() {
+                const id = $(this).data('id');
+                const room = roomList.find(r => r.id == id);
+                showRoomModal(room);
+            });
+        }
+
+        function showRoomModal(room) {
+            const statusOptions = [0,1,2,3,4].map(s => {
+                return `<option value="${s}" ${room.status == s ? 'selected' : ''}>${roomStatusText(s)}</option>`;
+            }).join('');
+
+            const modalHtml = `
+                <div class="modal fade" id="roomModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">房间详情 - ${room.roomNo}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>房型：${room.typeName || '未知'}</p>
+                                <p>楼层：${room.floor}</p>
+                                <p>价格：¥${room.price || 0}</p>
+                                <div class="mb-3">
+                                    <label class="form-label">状态</label>
+                                    <select class="form-select" id="roomStatusSelect">${statusOptions}</select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-primary" onclick="saveRoomStatus(${room.id})">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#roomModal').remove();
+            $('body').append(modalHtml);
+            new bootstrap.Modal(document.getElementById('roomModal')).show();
+        }
+
+        function saveRoomStatus(id) {
+            const status = $('#roomStatusSelect').val();
+            $.post('/api/room/status/' + id + '/' + status, function(res) {
+                if (res.code === 200) {
+                    bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+                    loadRooms();
+                } else {
+                    alert(res.msg);
+                }
+            });
+        }
+
+        $(function() {
+            loadTypes();
+        });
+    </script>
+</main>
+</html>
