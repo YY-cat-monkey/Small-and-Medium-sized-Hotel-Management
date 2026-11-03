@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: hotel-management-system
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: railway-deploy
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /login
+    autoDeployTrigger: commit
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
