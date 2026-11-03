@@ -45,15 +45,20 @@
 
 ### 3. 配置数据库连接
 
-编辑 `src/main/resources/application.yml`：
+数据库账号通过环境变量注入，`application.yml` 中不含真实凭据：
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/hotel_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root        # 改为你的 MySQL 用户名
-    password: root        # 改为你的 MySQL 密码
+    url: jdbc:mysql://localhost:3306/hotel_db?...
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
 ```
+
+本地开发无需任何配置，直接使用默认值即可运行。如需修改，任选一种：
+
+1. **设置环境变量**（推荐）：`DB_USERNAME` / `DB_PASSWORD`
+2. **新建 `application-local.yml`** 覆盖配置（该文件已在 `.gitignore` 中忽略）
 
 ### 4. 使用 IDEA 运行
 
