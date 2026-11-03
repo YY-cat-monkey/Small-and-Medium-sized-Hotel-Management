@@ -77,6 +77,41 @@ mvn clean package
 java -jar target/hotel-management-system-1.0.0.jar
 ```
 
+## 云端部署（Railway，任意电脑浏览器可用）
+
+项目自带 `Dockerfile` 与 `railway.toml`，无需本地装 Maven/JDK，Railway 远端构建。
+
+### 部署步骤
+
+```bash
+npm i -g @railway/cli
+railway login              # 浏览器授权
+railway init               # 新建项目
+railway add --plugin mysql # 添加 MySQL
+railway up                 # 上传并构建部署
+railway domain             # 生成公网域名
+```
+
+### 环境变量
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `PORT` | 监听端口，Railway 自动注入 | 8080 |
+| `DB_URL` | 完整 JDBC 地址，优先级最高 | 由下方变量拼装 |
+| `MYSQLHOST` / `MYSQLPORT` / `MYSQLDATABASE` | MySQL 插件自动注入 | localhost:3306/hotel_db |
+| `DB_USERNAME` / `DB_PASSWORD` | 数据库账号密码 | root / 123456 |
+
+### 首次启动自动初始化
+
+- `src/main/resources/schema.sql`：`CREATE TABLE IF NOT EXISTS` 建表，不删除既有数据。
+- `src/main/resources/data.sql`：种子数据，`INSERT IGNORE` / `WHERE NOT EXISTS` 保证幂等。
+- 首次部署无需手动执行 SQL，容器启动后自动建表并写入默认账号。
+
+### 注意事项
+
+- 会话保存在内存，单实例运行；不要开多副本（否则登录态会随机丢失）。
+- 免费/试用实例 RAM 较小，容器已设 `-XX:MaxRAMPercentage=60` 与串行 GC。
+
 ## 项目结构
 
 ```
